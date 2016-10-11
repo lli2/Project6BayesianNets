@@ -106,7 +106,7 @@ public class BayesNode {
                 this.sampleValue = 0;
             }
         }
-        this.sampleValue = 0; // Something went wrong.
+        //this.sampleValue = 0; // Something went wrong.
     }
 
     public void setLikelihoodSample(){ // Uses likelihood sampling
@@ -114,9 +114,11 @@ public class BayesNode {
             return;
         }
         else if(this.type=='t'){ // True evidence
+            //System.out.println("True evidence for "+this.name);
             this.sampleValue = 1;
         }
         else if(this.type=='f'){ // False evidence
+            //System.out.println("False evidence for "+this.name);
             this.sampleValue = 0;
         }
         else{ // Either query or unknown
@@ -143,7 +145,8 @@ public class BayesNode {
                 }
             }
         }
-        this.sampleValue = 0; // Something went wrong.
+        //System.out.println("ERROR");
+        //this.sampleValue = 0; // Something went wrong.
     }
 
     public void dropSample(){

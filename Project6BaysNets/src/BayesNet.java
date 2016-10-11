@@ -62,81 +62,76 @@ public class BayesNet {
 	public void assignStatus(String filename) throws FileNotFoundException{//char[] values){
 		File inputFile = new File(filename);
 		Scanner input = new Scanner(inputFile);
-		ArrayList<String> string = new ArrayList<String>();
+		String inputString = "";
 		
 		//String[] charArr = null;
-		while(input.hasNextLine()){
-			String temp = input.nextLine();
-			string.add(temp);
+		if(input.hasNextLine()){
+			inputString = input.nextLine();
 			//System.out.println(temp);
 		}
-		for(int i = 0; i < string.get(0).length(); i++){
-			char[] charArr = new char[string.get(0).length()];
-			char c = string.get(i).charAt(i);
-			charArr[i] = c;
-			System.out.println(charArr[i]);
+		else{
+		    System.exit(0);
 		}
-		/*String[] str = string.get(0).split(",");
-		System.out.println(str.length);
-		String chArr = Arrays.toString(str);
-		System.out.println(chArr);*/
-		/*for(int i = 0; i < str.length; i++){
-			chArr[i] = str[i].toChar();
-			System.out.println(chArr[i]);
-		}*/
-
-		//System.out.println(string);
-		String[] tempS = string.toArray(new String[]{});
-		//System.out.println(tempS);
-		char[] cArr = new char[tempS.length];
-		//System.out.println(tempS.length);
-		for(int o = 0; o < tempS.length; o++){
-			cArr[o] = tempS[o].charAt(o);
-			//System.out.println(cArr[o]);
+		for(int i = 0; i < this.nodes.size(); i++){
+			char c = inputString.charAt(i*2);
+			this.nodes.get(i).setType(c);
 		}
-		//String[] tempArr = temps.split(",");
-		//String t = Arrays.toString(tempS);
-		//System.out.println(t);
-		//char[] charArr = t.toCharArray();
-		//for(char output: charArr){
-		
-		//System.out.println(output);
-		//}
-		//for(int k = 0; k < nodes.size(); k++){
-			//nodes.get(k).setType(cArr[k]);
-
-			//System.out.println(charArr[k]);
-			//System.out.println(nodes.get(k).getType());
-	//	}
 	input.close();
-}
-	
+	}
+
 	public double rejectionSampling(int numSamples){
-		int notDiscardedSample = 0;
+		int sumSampleValues = 0;
 		int totalNumOfNotDiscarded = numSamples;
 		
-		for(int i = 0; i < nodes.size(); i++){
-			for(int j = 0; j < numSamples; j++){
-				nodes.get(i).setSample();
-				if(nodes.get(i).getSample() == nodes.get(i).getType()){
-					notDiscardedSample++; 
-				}
-				else {
-					nodes.get(i).dropSample();
-					totalNumOfNotDiscarded--;
-				}
+		for(int i = 0; i < numSamples; i++){
+		    int sampleValue = -1;
+			for(int j = 0; j < this.nodes.size(); j++){
+				this.nodes.get(j).setSample();
 			}
+			for(int j = 0; j < this.nodes.size(); j++){
+                if(this.nodes.get(j).getType()=='t'&&this.nodes.get(j).getSample()!=1){
+                    totalNumOfNotDiscarded--;
+                    sampleValue=-1;
+                    break;
+                }
+                else if(this.nodes.get(j).getType()=='f'&&this.nodes.get(j).getSample()!=0){
+                    totalNumOfNotDiscarded--;
+                    sampleValue=-1;
+                    break;
+                }
+                if(this.nodes.get(j).getType()=='?'){
+                    sampleValue=this.nodes.get(j).getSample();
+                }
+            }
+            for(int j = 0; j < this.nodes.size(); j++){
+                this.nodes.get(j).dropSample();
+            }
+            if(sampleValue!=-1){
+                sumSampleValues += sampleValue;
+            }
 		}
-		return notDiscardedSample/totalNumOfNotDiscarded;
+		return (double) sumSampleValues / (double) totalNumOfNotDiscarded;
 	}
 
 	public double likelihoodWeighting(int numSamples){
 		double weightProb = 0;
-		for(int i = 0; i < nodes.size(); i++){
-			for(int j = 0; j < numSamples; j++){
-				nodes.get(i).setLikelihoodSample();
-			}
+		int sumSamples = 0;
+		for(int i = 0; i < numSamples; i++){
+	        for(int j = 0; j < this.nodes.size(); j++){
+	            //System.out.println(this.nodes.get(j).getName()+" is: " + this.nodes.get(j).getSample());
+	            nodes.get(j).setLikelihoodSample();
+	        }
+			for(int j = 0; j < this.nodes.size(); j++){
+			    //System.out.println(this.nodes.get(j).getName()+" is: " +this.nodes.get(j).getType()+" with " + this.nodes.get(j).getSample());
+			    if(this.nodes.get(j).getType()=='?'){
+                    sumSamples += this.nodes.get(j).getSample();
+                }
+            }
+			for(int j = 0; j < this.nodes.size(); j++){
+                this.nodes.get(j).dropSample();
+            }
 		}
+		weightProb = (double) sumSamples / (double) numSamples;
 		return weightProb;
 	}
 }
