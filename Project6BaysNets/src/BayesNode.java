@@ -6,7 +6,7 @@ public class BayesNode {
     String name;
     ArrayList<BayesNode> parents;
     char type;  // '?'=query,  't'=evidence true,  'f'=evidence false,  '-'=unknown
-    double[][] cptTable; // row0 = probability of true   Column i is the value for the i'th row of the cpt table (i is a bit representation of the truth table).
+    double[] cptTable; // Index i is probability of true for the i'th row of the cpt table (i is a bit representation of the truth table).
     int sampleValue; // 0=false 1=true -1=not-sampled
 
     public BayesNode(String name, ArrayList<BayesNode> parents) {
@@ -15,10 +15,10 @@ public class BayesNode {
         this.parents = parents;
         this.type = '-';
         if(parents==null){
-            this.cptTable = new double[2][1];
+            this.cptTable = new double[1];
         }
         else{
-            this.cptTable = new double[2][(int) Math.pow(2, parents.size())];
+            this.cptTable = new double[(int) Math.pow(2, parents.size())];
         }
         this.sampleValue = -1;
     }
@@ -35,10 +35,10 @@ public class BayesNode {
     public void setParents(ArrayList<BayesNode> parents) {
         this.parents = parents;
         if(parents==null){
-            this.cptTable = new double[2][1];
+            this.cptTable = new double[1];
         }
         else{
-            this.cptTable = new double[2][(int) Math.pow(2, parents.size())];
+            this.cptTable = new double[(int) Math.pow(2, parents.size())];
         }
     }
     public char getType() {
@@ -47,11 +47,11 @@ public class BayesNode {
     public void setType(char type) {
         this.type = type;
     }
-    public double getCptValue(int r, int c) {
-        return cptTable[r][c];
+    public double getCptValue(int i) {
+        return cptTable[i];
     }
-    public void modifyCptTable(int r, int c, double value) {
-        this.cptTable[r][c] = value;
+    public void modifyCptTable(int i, double value) {
+        this.cptTable[i] = value;
     }
     
     /*public double getProb(){
@@ -86,7 +86,7 @@ public class BayesNode {
     public void setSample(){ // Uses prior sampling method
         double val = Math.random();
         if(this.parents==null || this.parents.size()==0){ // No parents
-            if(val<this.cptTable[0][0]){
+            if(val<this.cptTable[0]){
                 this.sampleValue = 1;
             }
             else{
@@ -99,7 +99,7 @@ public class BayesNode {
                 this.parents.get(i).setLikelihoodSample(); // Set sample for parent (if not set)
                 index = index | (this.parents.get(i).getSample() << i); // Bit representation of cpt truth table
             }
-            if(val<this.cptTable[0][index]){
+            if(val<this.cptTable[index]){
                 this.sampleValue = 1;
             }
             else{
@@ -122,7 +122,7 @@ public class BayesNode {
         else{ // Either query or unknown
             double val = Math.random();
             if(this.parents==null || this.parents.size()==0){ // No parents
-                if(val<this.cptTable[0][0]){
+                if(val<this.cptTable[0]){
                     this.sampleValue = 1;
                 }
                 else{
@@ -135,7 +135,7 @@ public class BayesNode {
                     this.parents.get(i).setLikelihoodSample(); // Set sample for parent (if not set)
                     index = index | (this.parents.get(i).getSample() << i); // Bit representation of cpt truth table
                 }
-                if(val<this.cptTable[0][index]){
+                if(val<this.cptTable[index]){
                     this.sampleValue = 1;
                 }
                 else{
