@@ -21,7 +21,7 @@ public class BayesNet {
 
 		while(input.hasNextLine()){
 			String temp = input.nextLine();
-			System.out.println("Looping");
+			//System.out.println("Looping");
 			String name = temp.substring(0, temp.indexOf(":"));
 			String parents = temp.substring(temp.indexOf("[") + 1, temp.indexOf("]"));
 			String cpt = temp.substring(temp.lastIndexOf("[") + 1, temp.lastIndexOf("]"));
