@@ -84,6 +84,28 @@ public class BayesNode {
     }
 
     public void setSample(){ // Uses prior sampling method
+        double val = Math.random();
+        if(this.parents==null || this.parents.size()==0){ // No parents
+            if(val<this.cptTable[0][0]){
+                this.sampleValue = 1;
+            }
+            else{
+                this.sampleValue = 0;
+            }
+        }
+        else{ // Has parents; Sample parents first.
+            int index = 0;
+            for(int i = 0; i < this.parents.size(); i++){ // Find index in cpt table for parents.
+                this.parents.get(i).setLikelihoodSample(); // Set sample for parent (if not set)
+                index = index | (this.parents.get(i).getSample() << i); // Bit representation of cpt truth table
+            }
+            if(val<this.cptTable[0][index]){
+                this.sampleValue = 1;
+            }
+            else{
+                this.sampleValue = 0;
+            }
+        }
         this.sampleValue = 0; // Something went wrong.
     }
 
