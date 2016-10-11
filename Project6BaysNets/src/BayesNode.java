@@ -32,8 +32,14 @@ public class BayesNode {
     public ArrayList<BayesNode> getParents() {
         return parents;
     }
-    public void addParent(BayesNode p) {
-        this.parents.add(p);
+    public void setParents(ArrayList<BayesNode> parents) {
+        this.parents = parents;
+        if(parents==null){
+            this.cptTable = new float[2][1];
+        }
+        else{
+            this.cptTable = new float[2][(int) Math.pow(2, parents.size())];
+        }
     }
     public char getType() {
         return type;
