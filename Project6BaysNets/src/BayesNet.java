@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -54,28 +53,90 @@ public class BayesNet {
 			for(int p = 0; p < cptsTok.length; p++){
 				nodes.get(i).modifyCptTable(p, Double.parseDouble(cptsTok[p]));
 			}
-			System.out.println(nodes.get(i).getName() + " " + nodes.get(i).getParents() + " " + Arrays.toString(nodes.get(i).cptTable));
+			//System.out.println(nodes.get(i) + " " + nodes.get(i).getParents() + " " + Arrays.toString(nodes.get(i).cptTable));
 		}
+		input.close();
 		return;
 	}
 
-	public void cptTableMethodA(float[] vals){
-		return;
+	public void assignStatus(String filename) throws FileNotFoundException{//char[] values){
+		File inputFile = new File(filename);
+		Scanner input = new Scanner(inputFile);
+		ArrayList<String> string = new ArrayList<String>();
+		
+		//String[] charArr = null;
+		while(input.hasNextLine()){
+			String temp = input.nextLine();
+			string.add(temp);
+			//System.out.println(temp);
+		}
+		for(int i = 0; i < string.get(0).length(); i++){
+			char[] charArr = new char[string.get(0).length()];
+			char c = string.get(i).charAt(i);
+			charArr[i] = c;
+			System.out.println(charArr[i]);
+		}
+		/*String[] str = string.get(0).split(",");
+		System.out.println(str.length);
+		String chArr = Arrays.toString(str);
+		System.out.println(chArr);*/
+		/*for(int i = 0; i < str.length; i++){
+			chArr[i] = str[i].toChar();
+			System.out.println(chArr[i]);
+		}*/
+
+		//System.out.println(string);
+		String[] tempS = string.toArray(new String[]{});
+		//System.out.println(tempS);
+		char[] cArr = new char[tempS.length];
+		//System.out.println(tempS.length);
+		for(int o = 0; o < tempS.length; o++){
+			cArr[o] = tempS[o].charAt(o);
+			//System.out.println(cArr[o]);
+		}
+		//String[] tempArr = temps.split(",");
+		//String t = Arrays.toString(tempS);
+		//System.out.println(t);
+		//char[] charArr = t.toCharArray();
+		//for(char output: charArr){
+		
+		//System.out.println(output);
+		//}
+		//for(int k = 0; k < nodes.size(); k++){
+			//nodes.get(k).setType(cArr[k]);
+
+			//System.out.println(charArr[k]);
+			//System.out.println(nodes.get(k).getType());
+	//	}
+	input.close();
+}
+	
+	public double rejectionSampling(int numSamples){
+		int notDiscardedSample = 0;
+		int totalNumOfNotDiscarded = numSamples;
+		
+		for(int i = 0; i < nodes.size(); i++){
+			for(int j = 0; j < numSamples; j++){
+				nodes.get(i).setSample();
+				if(nodes.get(i).getSample() == nodes.get(i).getType()){
+					notDiscardedSample++; 
+				}
+				else {
+					nodes.get(i).dropSample();
+					totalNumOfNotDiscarded--;
+				}
+			}
+		}
+		return notDiscardedSample/totalNumOfNotDiscarded;
 	}
 
-	public void cptTableMethodB(float[] vals){
-		return;
-	}
-
-	public void assignStatus(char[] values){
-		return;
-	}
-
-	public void rejectionSampling(int numSamples){
-		return;
-	}
-
-	public void likelihoodWeighting(int numSamples){
-		return;
+	public double likelihoodWeighting(int numSamples){
+		double weightProb = 0;
+		for(int i = 0; i < nodes.size(); i++){
+			for(int j = 0; j < numSamples; j++){
+				nodes.get(i).setLikelihoodSample();
+			}
+		}
+		return weightProb;
 	}
 }
