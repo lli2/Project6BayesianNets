@@ -6,7 +6,7 @@ public class BayesNode {
     String name;
     ArrayList<BayesNode> parents;
     char type;  // '?'=query,  't'=evidence true,  'f'=evidence false,  '-'=unknown
-    float[][] cptTable; // row0 = probability of true   Column i is the value for the i'th row of the cpt table.
+    double[][] cptTable; // row0 = probability of true   Column i is the value for the i'th row of the cpt table (i is a bit representation of the truth table).
     int sampleValue; // 0=false 1=true -1=not-sampled
 
     public BayesNode(String name, ArrayList<BayesNode> parents) {
@@ -15,10 +15,10 @@ public class BayesNode {
         this.parents = parents;
         this.type = '-';
         if(parents==null){
-            this.cptTable = new float[2][1];
+            this.cptTable = new double[2][1];
         }
         else{
-            this.cptTable = new float[2][(int) Math.pow(2, parents.size())];
+            this.cptTable = new double[2][(int) Math.pow(2, parents.size())];
         }
         this.sampleValue = -1;
     }
@@ -35,10 +35,10 @@ public class BayesNode {
     public void setParents(ArrayList<BayesNode> parents) {
         this.parents = parents;
         if(parents==null){
-            this.cptTable = new float[2][1];
+            this.cptTable = new double[2][1];
         }
         else{
-            this.cptTable = new float[2][(int) Math.pow(2, parents.size())];
+            this.cptTable = new double[2][(int) Math.pow(2, parents.size())];
         }
     }
     public char getType() {
@@ -47,20 +47,20 @@ public class BayesNode {
     public void setType(char type) {
         this.type = type;
     }
-    public float getCptValue(int r, int c) {
+    public double getCptValue(int r, int c) {
         return cptTable[r][c];
     }
-    public void modifyCptTable(int r, int c, float value) {
+    public void modifyCptTable(int r, int c, double value) {
         this.cptTable[r][c] = value;
     }
     
-    /*public float getProb(){
-        float p = 0;
+    /*public double getProb(){
+        double p = 0;
         if(this.parents==null || this.parents.size()==0){
             return this.cptTable[0][0];
         }
         else{
-            float parentsP = 1;
+            double parentsP = 1;
             int[] parentVals = new int[this.parents.size()];
             for(int i = 0; i < this.cptTable[0].length; i++){ // Loop for each row of cpt table
                 parentsP = 1;
@@ -83,14 +83,48 @@ public class BayesNode {
         return sampleValue;
     }
 
-    public void setSample(){
-        this.sampleValue = 0;
+    public void setSample(){ // Uses prior sampling method
+        this.sampleValue = 0; // Something went wrong.
+    }
+
+    public void setLikelihoodSample(){ // Uses likelihood sampling
+        if(this.sampleValue != -1){ // Don't sample a node that is already set.
+            return;
+        }
+        else if(this.type=='t'){ // True evidence
+            this.sampleValue = 1;
+        }
+        else if(this.type=='f'){ // False evidence
+            this.sampleValue = 0;
+        }
+        else{ // Either query or unknown
+            double val = Math.random();
+            if(this.parents==null || this.parents.size()==0){ // No parents
+                if(val<this.cptTable[0][0]){
+                    this.sampleValue = 1;
+                }
+                else{
+                    this.sampleValue = 0;
+                }
+            }
+            else{ // Has parents; Sample parents first.
+                int index = 0;
+                for(int i = 0; i < this.parents.size(); i++){ // Find index in cpt table for parents.
+                    this.parents.get(i).setLikelihoodSample(); // Set sample for parent (if not set)
+                    index = index | (this.parents.get(i).getSample() << i); // Bit representation of cpt truth table
+                }
+                if(val<this.cptTable[0][index]){
+                    this.sampleValue = 1;
+                }
+                else{
+                    this.sampleValue = 0;
+                }
+            }
+        }
+        this.sampleValue = 0; // Something went wrong.
     }
 
     public void dropSample(){
-        //if(this.type!=1){ // Evidence variables aren't reset for samples.
-        //    this.sampleValue = -1;
-        //}
         this.sampleValue = -1;
     }
 }
